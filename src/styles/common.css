@@ -1,0 +1,6 @@
+.ivu-table-header table thead tr th {
+    border-right: 1px solid #CED2DA !important;
+    background:rgba(226,234,240,1);
+    user-select: none;
+    -moz-user-select: none;
+}
