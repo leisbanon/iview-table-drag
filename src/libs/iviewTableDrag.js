@@ -124,6 +124,9 @@ let install = {
         document.body.style.cursor = 'initial';
 
         if(then.completeMoveDistance) {
+            // get current drag column distantce
+            let columnWidth = then.dragTableItems.column[then.dragTableItems.dragBlockIndex].getBoundingClientRect().width;
+
             // mouse loosen`set table column width
             let {warpper,dragBlockIndex} = then.dragTableItems;
             let colHeader = warpper.querySelectorAll('.ivu-table-header table colgroup col');
@@ -136,24 +139,36 @@ let install = {
             // then drag move distance
             let moveDistance = then._moveClientX - then._downClientX;
             // table container widtg
-            let tableWarpWidth = warpper.getBoundingClientRect().width - 1;
+            let tableRect = warpper.getBoundingClientRect();
             console.log('move size：' + moveDistance);
 
             // dynamic set table container width
-            let setTableContrainerWidthAll = function(className) {
+            let setTableContrainerWidthAll = function() {
                 warpper.querySelector('.ivu-table-body').style.overflowX = 'auto';
-                let nodeWidth = warpper.querySelector(className[0]).style.width.replace('px','');
+                let nodeWidth = warpper.querySelector('.ivu-table-header table').style.width.replace('px','');
 
-                for(let name of className) {
-                    let count = Number.parseInt(nodeWidth) + moveDistance;
-                    warpper.querySelector(name).style.width = count > tableWarpWidth ? (count + 'px') : (tableWarpWidth + 'px');
+                if(columnWidth == (55 + 5) && moveDistance <= 0) {
+                    return;
                 }
+
+                if(moveDistance < 0 && Math.abs(moveDistance) > columnWidth) {
+                    moveDistance = -columnWidth + 55 + 5;
+                }
+                
+                setTimeout(() => {
+                    let _elWidth = Number.parseInt(nodeWidth) + moveDistance;
+                    _elWidth = _elWidth > tableRect.width ? (_elWidth) : (tableRect.width);
+                    warpper.querySelector('.ivu-table-header table').style.width = _elWidth + 'px';
+                    warpper.querySelector('.ivu-table-body table').style.width = _elWidth + 'px';
+                    warpper.querySelector('.ivu-table-tip table tr td').style.width = _elWidth + 'px';
+
+                    let _elHeight = tableRect.height - warpper.querySelector('.ivu-table-header').getBoundingClientRect().height;
+                    warpper.querySelector('.ivu-table-body').style.height = _elHeight + 'px';
+                    warpper.querySelector('.ivu-table-tip').style.height = _elHeight + 'px';
+                    warpper.querySelector('.ivu-table-tip table tr td').style.height = _elHeight + 'px';
+                },50);
             };
-            setTableContrainerWidthAll([
-                '.ivu-table-header table',
-                '.ivu-table-body table',
-                '.ivu-table-tip table tr td'
-            ]);
+            setTableContrainerWidthAll();
         }
         
         // mouse loosen at init config pramas
